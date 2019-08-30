@@ -1,6 +1,7 @@
-MODULES = overflow
+MODULE_big = overflow
 
 EXTENSION = overflow
+OBJS = int.c uint.c $(WIN32RES)
 DATA = overflow--1.0.sql
 PGFILEDESC = "overflow - checks for overflows"
 

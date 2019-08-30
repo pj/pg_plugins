@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------
  *
- * overflow.c
+ * int.c
  *		Overflow checks for signed integers
  *
  * Copyright (c) 1996-2019, PostgreSQL Global Development Group
  *
  * IDENTIFICATION
- *		  overflow/overflow.c
+ *		  overflow/int.c
  *
  *-------------------------------------------------------------------------
  */

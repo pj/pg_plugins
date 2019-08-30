@@ -35,3 +35,8 @@ SELECT pg_mul_int64_overflow(9223372036854775807::bigint, 1::bigint);
 SELECT pg_mul_int64_overflow((-9223372036854775808)::bigint, 1::bigint);
 SELECT pg_mul_int64_overflow(9223372036854775807::bigint, (-1)::bigint);
 SELECT pg_mul_int64_overflow((-9223372036854775808)::bigint, (-1)::bigint);
+
+-- unsigned smallint overflow checks
+-- maximum uint16 65535
+-- maximum uint32 4294967295
+-- maximum uint64 18446744073709551615
