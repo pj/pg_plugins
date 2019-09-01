@@ -15,6 +15,7 @@
 #include "fmgr.h"
 
 #include "common/int.h"
+#include "utils/builtins.h"
 
 typedef enum
 {
@@ -44,12 +45,14 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 	int64		v1 = PG_GETARG_INT64(0);
 	int64		v2 = PG_GETARG_INT64(1);
 	int32		count = PG_GETARG_INT32(2);
-	const char *type_str = PG_GETARG_CSTRING(3);
-	const char *opr_str = PG_GETARG_CSTRING(4);
+	text	   *type_txt = PG_GETARG_TEXT_PP(3);
+	text	   *opr_txt = PG_GETARG_TEXT_PP(4);
 	bool		result = false;
 	PGOverflowType type = NONE;
 	PGOverflowOpr opr = OPR_NONE;
 	int			i;
+	char	   *type_str = text_to_cstring(type_txt);
+	char	   *opr_str = text_to_cstring(opr_txt);
 
 	/* extract variable type to work on */
 	if (strcmp(type_str, "int16") == 0)
@@ -113,6 +116,7 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 					Assert(false);
 					break;
 			}
+			break;
 		}
 		case INT32:
 		{
@@ -144,6 +148,7 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 					Assert(false);
 					break;
 			}
+			break;
 		}
 		case INT64:
 		{
@@ -175,6 +180,7 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 					Assert(false);
 					break;
 			}
+			break;
 		}
 
 		/* unsigned part */
@@ -208,6 +214,7 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 					Assert(false);
 					break;
 			}
+			break;
 		}
 		case UINT32:
 		{
@@ -239,6 +246,7 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 					Assert(false);
 					break;
 			}
+			break;
 		}
 		case UINT64:
 		{
@@ -270,9 +278,12 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 					Assert(false);
 					break;
 			}
+			break;
 		}
+
 		case NONE:
 			Assert(false);
+			break;
 	}
 
 	PG_RETURN_BOOL(result);
