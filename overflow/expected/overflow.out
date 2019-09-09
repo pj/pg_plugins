@@ -302,3 +302,166 @@ SELECT pg_mul_uint64_overflow((0)::bigint, (-1)::bigint);
  f
 (1 row)
 
+-- Conversion checks
+-- int16, min and max values and invalid input
+SELECT pg_string_to_int16('32767');
+ pg_string_to_int16 
+--------------------
+              32767
+(1 row)
+
+SELECT pg_string_to_int16('32768');
+ERROR:  value "32768" is out of range for type smallint
+SELECT pg_string_to_int16('-32768');
+ pg_string_to_int16 
+--------------------
+             -32768
+(1 row)
+
+SELECT pg_string_to_int16('-32769');
+ERROR:  value "-32769" is out of range for type smallint
+SELECT pg_string_to_int16('  -32769  ');
+ERROR:  value "  -32769  " is out of range for type smallint
+SELECT pg_string_to_int16('  -32768  ');
+ pg_string_to_int16 
+--------------------
+             -32768
+(1 row)
+
+SELECT pg_string_to_int16('  -12ad  ');
+ERROR:  invalid input syntax for type smallint: "  -12ad  "
+-- int32, min and max values and invalid input
+SELECT pg_string_to_int32('2147483647');
+ pg_string_to_int32 
+--------------------
+         2147483647
+(1 row)
+
+SELECT pg_string_to_int32('2147483648');
+ERROR:  value "2147483648" is out of range for type integer
+SELECT pg_string_to_int32('-2147483648');
+ pg_string_to_int32 
+--------------------
+        -2147483648
+(1 row)
+
+SELECT pg_string_to_int32('-2147483649');
+ERROR:  value "-2147483649" is out of range for type integer
+SELECT pg_string_to_int32('  -2147483648  ');
+ pg_string_to_int32 
+--------------------
+        -2147483648
+(1 row)
+
+SELECT pg_string_to_int32('  -2147483649  ');
+ERROR:  value "  -2147483649  " is out of range for type integer
+SELECT pg_string_to_int32('  -12ad  ');
+ERROR:  invalid input syntax for type integer: "  -12ad  "
+-- int64, min and max values and invalid input
+SELECT pg_string_to_int64('9223372036854775807');
+ pg_string_to_int64  
+---------------------
+ 9223372036854775807
+(1 row)
+
+SELECT pg_string_to_int64('9223372036854775808');
+ERROR:  value "9223372036854775808" is out of range for type bigint
+SELECT pg_string_to_int64('-9223372036854775808');
+  pg_string_to_int64  
+----------------------
+ -9223372036854775808
+(1 row)
+
+SELECT pg_string_to_int64('-9223372036854775809');
+ERROR:  value "-9223372036854775809" is out of range for type bigint
+SELECT pg_string_to_int64('  -9223372036854775808  ');
+  pg_string_to_int64  
+----------------------
+ -9223372036854775808
+(1 row)
+
+SELECT pg_string_to_int64('  -9223372036854775809  ');
+ERROR:  value "  -9223372036854775809  " is out of range for type bigint
+SELECT pg_string_to_int64('  -12ad  ');
+ERROR:  invalid input syntax for type bigint: "  -12ad  "
+-- uint16, min and max values and invalid input
+SELECT pg_string_to_uint16('65535');
+ pg_string_to_uint16 
+---------------------
+                  -1
+(1 row)
+
+SELECT pg_string_to_uint16('65536');
+ERROR:  value "65536" is out of range for type smallint
+SELECT pg_string_to_uint16('0');
+ pg_string_to_uint16 
+---------------------
+                   0
+(1 row)
+
+SELECT pg_string_to_uint16('-1');
+ERROR:  invalid input syntax for type smallint: "-1"
+SELECT pg_string_to_uint16('  65535  ');
+ pg_string_to_uint16 
+---------------------
+                  -1
+(1 row)
+
+SELECT pg_string_to_uint16('  65536  ');
+ERROR:  value "  65536  " is out of range for type smallint
+SELECT pg_string_to_uint16('  12ad  ');
+ERROR:  invalid input syntax for type smallint: "  12ad  "
+-- uint32, min and max values and invalid input
+SELECT pg_string_to_uint32('4294967295');
+ pg_string_to_uint32 
+---------------------
+                  -1
+(1 row)
+
+SELECT pg_string_to_uint32('4294967296');
+ERROR:  value "4294967296" is out of range for type integer
+SELECT pg_string_to_uint32('0');
+ pg_string_to_uint32 
+---------------------
+                   0
+(1 row)
+
+SELECT pg_string_to_uint32('-1');
+ERROR:  invalid input syntax for type integer: "-1"
+SELECT pg_string_to_uint32('  4294967295  ');
+ pg_string_to_uint32 
+---------------------
+                  -1
+(1 row)
+
+SELECT pg_string_to_uint32('  4294967296  ');
+ERROR:  value "  4294967296  " is out of range for type integer
+SELECT pg_string_to_uint32('  12ad  ');
+ERROR:  invalid input syntax for type integer: "  12ad  "
+-- uint64, min and max values and invalid input
+SELECT pg_string_to_uint64('18446744073709551615');
+ pg_string_to_uint64 
+---------------------
+                  -1
+(1 row)
+
+SELECT pg_string_to_uint64('18446744073709551616');
+ERROR:  value "18446744073709551616" is out of range for type bigint
+SELECT pg_string_to_uint64('0');
+ pg_string_to_uint64 
+---------------------
+                   0
+(1 row)
+
+SELECT pg_string_to_uint64('-1');
+ERROR:  invalid input syntax for type bigint: "-1"
+SELECT pg_string_to_uint64('  18446744073709551615  ');
+ pg_string_to_uint64 
+---------------------
+                  -1
+(1 row)
+
+SELECT pg_string_to_uint64('  18446744073709551616  ');
+ERROR:  value "  18446744073709551616  " is out of range for type bigint
+SELECT pg_string_to_uint64('  12ad  ');
+ERROR:  invalid input syntax for type bigint: "  12ad  "

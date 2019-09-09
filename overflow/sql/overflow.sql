@@ -68,3 +68,54 @@ SELECT pg_mul_uint64_overflow((-1)::bigint, 1::bigint);
 SELECT pg_mul_uint64_overflow(0::bigint, 1::bigint);
 SELECT pg_mul_uint64_overflow((-1)::bigint, (-1)::bigint);
 SELECT pg_mul_uint64_overflow((0)::bigint, (-1)::bigint);
+
+-- Conversion checks
+-- int16, min and max values and invalid input
+SELECT pg_string_to_int16('32767');
+SELECT pg_string_to_int16('32768');
+SELECT pg_string_to_int16('-32768');
+SELECT pg_string_to_int16('-32769');
+SELECT pg_string_to_int16('  -32769  ');
+SELECT pg_string_to_int16('  -32768  ');
+SELECT pg_string_to_int16('  -12ad  ');
+-- int32, min and max values and invalid input
+SELECT pg_string_to_int32('2147483647');
+SELECT pg_string_to_int32('2147483648');
+SELECT pg_string_to_int32('-2147483648');
+SELECT pg_string_to_int32('-2147483649');
+SELECT pg_string_to_int32('  -2147483648  ');
+SELECT pg_string_to_int32('  -2147483649  ');
+SELECT pg_string_to_int32('  -12ad  ');
+-- int64, min and max values and invalid input
+SELECT pg_string_to_int64('9223372036854775807');
+SELECT pg_string_to_int64('9223372036854775808');
+SELECT pg_string_to_int64('-9223372036854775808');
+SELECT pg_string_to_int64('-9223372036854775809');
+SELECT pg_string_to_int64('  -9223372036854775808  ');
+SELECT pg_string_to_int64('  -9223372036854775809  ');
+SELECT pg_string_to_int64('  -12ad  ');
+
+-- uint16, min and max values and invalid input
+SELECT pg_string_to_uint16('65535');
+SELECT pg_string_to_uint16('65536');
+SELECT pg_string_to_uint16('0');
+SELECT pg_string_to_uint16('-1');
+SELECT pg_string_to_uint16('  65535  ');
+SELECT pg_string_to_uint16('  65536  ');
+SELECT pg_string_to_uint16('  12ad  ');
+-- uint32, min and max values and invalid input
+SELECT pg_string_to_uint32('4294967295');
+SELECT pg_string_to_uint32('4294967296');
+SELECT pg_string_to_uint32('0');
+SELECT pg_string_to_uint32('-1');
+SELECT pg_string_to_uint32('  4294967295  ');
+SELECT pg_string_to_uint32('  4294967296  ');
+SELECT pg_string_to_uint32('  12ad  ');
+-- uint64, min and max values and invalid input
+SELECT pg_string_to_uint64('18446744073709551615');
+SELECT pg_string_to_uint64('18446744073709551616');
+SELECT pg_string_to_uint64('0');
+SELECT pg_string_to_uint64('-1');
+SELECT pg_string_to_uint64('  18446744073709551615  ');
+SELECT pg_string_to_uint64('  18446744073709551616  ');
+SELECT pg_string_to_uint64('  12ad  ');
