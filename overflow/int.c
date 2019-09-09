@@ -15,6 +15,8 @@
 #include "fmgr.h"
 
 #include "common/int.h"
+#include "common/string.h"
+#include "utils/builtins.h"
 
 PG_MODULE_MAGIC;
 
@@ -121,4 +123,87 @@ pg_mul_int64_overflow(PG_FUNCTION_ARGS)
 	int64		result;
 
 	PG_RETURN_BOOL(pg_mul_s64_overflow(v1, v2, &result));
+}
+
+/* string to uint conversion functions */
+PG_FUNCTION_INFO_V1(pg_string_to_int16);
+PG_FUNCTION_INFO_V1(pg_string_to_int32);
+PG_FUNCTION_INFO_V1(pg_string_to_int64);
+
+Datum
+pg_string_to_int16(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	char       *val = text_to_cstring(val_txt);
+	pg_strtoint_status status = PG_STRTOINT_OK;
+	int16		res;
+
+	status = pg_strtoint16(val, &res);
+
+	if (status == PG_STRTOINT_RANGE_ERROR)
+		ereport(ERROR,
+				(errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+				 errmsg("value \"%s\" is out of range for type %s",
+						val, "smallint")));
+	else if (status == PG_STRTOINT_SYNTAX_ERROR)
+		ereport(ERROR,
+				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
+				 errmsg("invalid input syntax for type %s: \"%s\"",
+						"smallint", val)));
+
+	PG_RETURN_INT16(res);
+}
+
+/*
+ * String to int functions
+ */
+Datum
+pg_string_to_int32(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	char       *val = text_to_cstring(val_txt);
+	pg_strtoint_status status = PG_STRTOINT_OK;
+	int32		res;
+
+	status = pg_strtoint32(val, &res);
+
+	if (status == PG_STRTOINT_RANGE_ERROR)
+		ereport(ERROR,
+				(errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+				 errmsg("value \"%s\" is out of range for type %s",
+						val, "integer")));
+	else if (status == PG_STRTOINT_SYNTAX_ERROR)
+		ereport(ERROR,
+				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
+				 errmsg("invalid input syntax for type %s: \"%s\"",
+						"integer", val)));
+
+	PG_RETURN_INT32(res);
+}
+
+/*
+ * String to int functions
+ */
+Datum
+pg_string_to_int64(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	char       *val = text_to_cstring(val_txt);
+	pg_strtoint_status status = PG_STRTOINT_OK;
+	int64		res;
+
+	status = pg_strtoint64(val, &res);
+
+	if (status == PG_STRTOINT_RANGE_ERROR)
+		ereport(ERROR,
+				(errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+				 errmsg("value \"%s\" is out of range for type %s",
+						val, "bigint")));
+	else if (status == PG_STRTOINT_SYNTAX_ERROR)
+		ereport(ERROR,
+				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
+				 errmsg("invalid input syntax for type %s: \"%s\"",
+						"bigint", val)));
+
+	PG_RETURN_INT64(res);
 }

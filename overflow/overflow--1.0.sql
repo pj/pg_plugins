@@ -93,3 +93,29 @@ CREATE FUNCTION pg_mul_uint64_overflow(IN v1 bigint, IN v2 bigint)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C;
+
+-- string to integer conversion functions
+CREATE FUNCTION pg_string_to_int16(IN val text)
+RETURNS smallint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_string_to_int32(IN val text)
+RETURNS integer
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_string_to_int64(IN val text)
+RETURNS bigint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_string_to_uint16(IN val text)
+RETURNS smallint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_string_to_uint32(IN val text)
+RETURNS integer
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_string_to_uint64(IN val text)
+RETURNS bigint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
