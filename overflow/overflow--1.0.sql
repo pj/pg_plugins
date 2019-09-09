@@ -119,3 +119,30 @@ CREATE FUNCTION pg_string_to_uint64(IN val text)
 RETURNS bigint
 AS 'MODULE_PATHNAME'
 LANGUAGE C;
+
+-- Performance comparison of conversion functions
+CREATE FUNCTION pg_strtouint64_old_check(
+  IN val text,
+  IN count int)
+RETURNS bigint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_strtouint64_new_check(
+  IN val text,
+  IN count int)
+RETURNS bigint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_strtoint_check(
+  IN val text,
+  IN count int,
+  IN size int)
+RETURNS bigint
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+CREATE FUNCTION pg_strtoint32_check(
+  IN val text,
+  IN count int)
+RETURNS integer
+AS 'MODULE_PATHNAME'
+LANGUAGE C;

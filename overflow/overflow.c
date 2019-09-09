@@ -15,6 +15,7 @@
 #include "fmgr.h"
 
 #include "common/int.h"
+#include "common/string.h"
 #include "utils/builtins.h"
 
 typedef enum
@@ -287,4 +288,116 @@ pg_overflow_check(PG_FUNCTION_ARGS)
 	}
 
 	PG_RETURN_BOOL(result);
+}
+
+/*
+ * pg_strtouint64
+ *	  Converts 'str' into an unsigned 64-bit integer.
+ *
+ * This has the identical API to strtoul(3), except that it will handle
+ * 64-bit ints even where "long" is narrower than that.
+ *
+ * For the moment it seems sufficient to assume that the platform has
+ * such a function somewhere; let's not roll our own.
+ *
+ * Note: this is an old implementation from PostgreSQL upstream which
+ * has been removed in v13, used here for performance comparison.
+ */
+static uint64
+pg_strtouint64_old(const char *str, char **endptr, int base)
+{
+#ifdef _MSC_VER                    /* MSVC only */
+	return _strtoui64(str, endptr, base);
+#elif defined(HAVE_STRTOULL) && SIZEOF_LONG < 8
+	return strtoull(str, endptr, base);
+#else
+	return strtoul(str, endptr, base);
+#endif
+}
+
+
+/*
+ * Wrapper of pg_strtouint64_old used for performance comparison.
+ */
+PG_FUNCTION_INFO_V1(pg_strtouint64_old_check);
+Datum
+pg_strtouint64_old_check(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	int32		count = PG_GETARG_INT32(1);
+	char	   *val = text_to_cstring(val_txt);
+	uint64		res;
+	int			i;
+
+	for (i = 0; i < count; i++)
+		res = pg_strtouint64_old(val, NULL, 10);
+
+	PG_RETURN_INT64(res);
+}
+
+/*
+ * Wrapper of pg_strtouint64 used for performance comparison.
+ *
+ * This ignores errors.
+ */
+PG_FUNCTION_INFO_V1(pg_strtouint64_new_check);
+Datum
+pg_strtouint64_new_check(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	int32		count = PG_GETARG_INT32(1);
+	char	   *val = text_to_cstring(val_txt);
+	uint64		res;
+	int			i;
+
+	/* just don't care about the status result here */
+	for (i = 0; i < count; i++)
+		(void) pg_strtouint64(val, &res);
+
+	PG_RETURN_INT64(res);
+}
+
+/*
+ * Wrapper of pg_strtoint() used for performance comparison.
+ *
+ * Note that this throws an ereport(ERROR) immediately on invalid
+ * input or overflow.
+ */
+PG_FUNCTION_INFO_V1(pg_strtoint_check);
+Datum
+pg_strtoint_check(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	int32		count = PG_GETARG_INT32(1);
+	int32		size = PG_GETARG_INT32(2);
+	char	   *val = text_to_cstring(val_txt);
+	int64		res;
+	int			i;
+
+	for (i = 0; i < count; i++)
+		res = pg_strtoint(val, size);
+
+	PG_RETURN_INT64(res);
+}
+
+/*
+ * Wrapper of pg_strtoint32 used for performance comparison.
+ *
+ * This ignores errors.
+ */
+PG_FUNCTION_INFO_V1(pg_strtoint32_check);
+Datum
+pg_strtoint32_check(PG_FUNCTION_ARGS)
+{
+	text	   *val_txt = PG_GETARG_TEXT_PP(0);
+	int32		count = PG_GETARG_INT32(1);
+	char	   *val = text_to_cstring(val_txt);
+	int32		res;
+	int			i;
+
+	/* just don't care about the status result here */
+	for (i = 0; i < count; i++)
+		(void) pg_strtoint32(val, &res);
+
+	PG_RETURN_INT32(res);
 }
