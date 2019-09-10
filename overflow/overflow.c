@@ -363,21 +363,20 @@ pg_strtouint64_new_check(PG_FUNCTION_ARGS)
  * Note that this throws an ereport(ERROR) immediately on invalid
  * input or overflow.
  */
-PG_FUNCTION_INFO_V1(pg_strtoint_check);
+PG_FUNCTION_INFO_V1(pg_strtoint32_check_perf);
 Datum
-pg_strtoint_check(PG_FUNCTION_ARGS)
+pg_strtoint32_check_perf(PG_FUNCTION_ARGS)
 {
 	text	   *val_txt = PG_GETARG_TEXT_PP(0);
 	int32		count = PG_GETARG_INT32(1);
-	int32		size = PG_GETARG_INT32(2);
 	char	   *val = text_to_cstring(val_txt);
-	int64		res;
+	int32		res;
 	int			i;
 
 	for (i = 0; i < count; i++)
-		res = pg_strtoint(val, size);
+		res = pg_strtoint32_check(val);
 
-	PG_RETURN_INT64(res);
+	PG_RETURN_INT32(res);
 }
 
 /*
@@ -385,9 +384,9 @@ pg_strtoint_check(PG_FUNCTION_ARGS)
  *
  * This ignores errors.
  */
-PG_FUNCTION_INFO_V1(pg_strtoint32_check);
+PG_FUNCTION_INFO_V1(pg_strtoint32_perf);
 Datum
-pg_strtoint32_check(PG_FUNCTION_ARGS)
+pg_strtoint32_perf(PG_FUNCTION_ARGS)
 {
 	text	   *val_txt = PG_GETARG_TEXT_PP(0);
 	int32		count = PG_GETARG_INT32(1);

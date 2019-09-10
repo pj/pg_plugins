@@ -138,16 +138,8 @@ pg_string_to_uint16(PG_FUNCTION_ARGS)
 
 	status = pg_strtouint16(val, &res);
 
-	if (status == PG_STRTOINT_RANGE_ERROR)
-		ereport(ERROR,
-				(errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-				 errmsg("value \"%s\" is out of range for type %s",
-						val, "smallint")));
-	else if (status == PG_STRTOINT_SYNTAX_ERROR)
-		ereport(ERROR,
-				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
-				 errmsg("invalid input syntax for type %s: \"%s\"",
-						"smallint", val)));
+	if (unlikely(status != PG_STRTOINT_OK))
+		pg_strtoint_error(status, val, "uint16");
 
 	PG_RETURN_INT16(res);
 }
@@ -165,16 +157,8 @@ pg_string_to_uint32(PG_FUNCTION_ARGS)
 
 	status = pg_strtouint32(val, &res);
 
-	if (status == PG_STRTOINT_RANGE_ERROR)
-		ereport(ERROR,
-				(errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-				 errmsg("value \"%s\" is out of range for type %s",
-						val, "integer")));
-	else if (status == PG_STRTOINT_SYNTAX_ERROR)
-		ereport(ERROR,
-				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
-				 errmsg("invalid input syntax for type %s: \"%s\"",
-						"integer", val)));
+	if (unlikely(status != PG_STRTOINT_OK))
+		pg_strtoint_error(status, val, "uint32");
 
 	PG_RETURN_INT32(res);
 }
@@ -192,16 +176,8 @@ pg_string_to_uint64(PG_FUNCTION_ARGS)
 
 	status = pg_strtouint64(val, &res);
 
-	if (status == PG_STRTOINT_RANGE_ERROR)
-		ereport(ERROR,
-				(errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-				 errmsg("value \"%s\" is out of range for type %s",
-						val, "bigint")));
-	else if (status == PG_STRTOINT_SYNTAX_ERROR)
-		ereport(ERROR,
-				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
-				 errmsg("invalid input syntax for type %s: \"%s\"",
-						"bigint", val)));
+	if (unlikely(status != PG_STRTOINT_OK))
+		pg_strtoint_error(status, val, "uint64");
 
 	PG_RETURN_INT64(res);
 }

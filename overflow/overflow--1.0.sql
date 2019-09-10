@@ -133,14 +133,13 @@ CREATE FUNCTION pg_strtouint64_new_check(
 RETURNS bigint
 AS 'MODULE_PATHNAME'
 LANGUAGE C;
-CREATE FUNCTION pg_strtoint_check(
+CREATE FUNCTION pg_strtoint32_check_perf(
   IN val text,
-  IN count int,
-  IN size int)
-RETURNS bigint
+  IN count int)
+RETURNS integer
 AS 'MODULE_PATHNAME'
 LANGUAGE C;
-CREATE FUNCTION pg_strtoint32_check(
+CREATE FUNCTION pg_strtoint32_perf(
   IN val text,
   IN count int)
 RETURNS integer
