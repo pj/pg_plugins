@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <assert.h>
+#include <string.h>
 
 #define BLCKSZ 8192
 #define N_SUMS 32
@@ -10,6 +12,12 @@ typedef struct ItemIdData
 		lp_flags:2,     /* state of line pointer, see below */
 		lp_len:15;      /* byte length of tuple */
 } ItemIdData;
+
+typedef unsigned char uint8;    /* == 8 bits */
+typedef unsigned short uint16;  /* == 16 bits */
+typedef unsigned int uint32;
+typedef unsigned long int uint64;
+typedef uint32 BlockNumber;
 
 typedef struct PageHeaderData
 {
@@ -23,7 +31,6 @@ typedef struct PageHeaderData
 	uint16 pd_special;   /* offset to start of special space */
 	uint16      pd_pagesize_version;
 	uint32 pd_prune_xid; /* oldest prunable XID, or zero if none */
-	ItemIdData  pd_linp[FLEXIBLE_ARRAY_MEMBER]; /* line pointer array */
 } PageHeaderData;
 
 typedef union
@@ -62,7 +69,7 @@ pg_checksum_block(const PGChecksummablePage *page)
 				j;
 
 	/* ensure that the size is compatible with the algorithm */
-	Assert(sizeof(PGChecksummablePage) == BLCKSZ);
+	assert(sizeof(PGChecksummablePage) == BLCKSZ);
 
 	/* initialize partial checksums to their corresponding offsets */
 	memcpy(sums, checksumBaseOffsets, sizeof(checksumBaseOffsets));
@@ -91,9 +98,6 @@ checksum_page(char *page, BlockNumber blkno)
 	uint16		save_checksum;
 	uint32		checksum;
 
-	/* We only calculate the checksum for properly-initialized pages */
-	Assert(!PageIsNew(&cpage->phdr));
-
 	/*
 	 * Save pd_checksum and temporarily set it to zero, so that the checksum
 	 * calculation isn't affected by the old checksum stored on the page.
@@ -118,5 +122,14 @@ checksum_page(char *page, BlockNumber blkno)
 int
 main()
 {
-	exit(0);
+	char page[BLCKSZ];
+	//int	filler = 0xffffffff;
+	int	filler = 0x01010101;
+	uint16 checksum;
+
+	memset(page, filler, BLCKSZ);
+	checksum = checksum_page(page, 50);
+	fprintf(stderr, "checksum %u\n", checksum);
+
+	return 0;
 }
