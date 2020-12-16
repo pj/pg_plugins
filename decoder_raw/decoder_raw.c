@@ -57,6 +57,10 @@ static void decoder_raw_commit_txn(LogicalDecodingContext *ctx,
 static void decoder_raw_change(LogicalDecodingContext *ctx,
 							   ReorderBufferTXN *txn, Relation rel,
 							   ReorderBufferChange *change);
+static void decoder_raw_message(LogicalDecodingContext *ctx,
+					ReorderBufferTXN *txn, XLogRecPtr lsn,
+          bool transactional, const char *prefix, 
+          Size content_size, const char *content);
 
 void
 _PG_init(void)
@@ -75,6 +79,7 @@ _PG_output_plugin_init(OutputPluginCallbacks *cb)
 	cb->change_cb = decoder_raw_change;
 	cb->commit_cb = decoder_raw_commit_txn;
 	cb->shutdown_cb = decoder_raw_shutdown;
+  cb->message_cb = decoder_raw_message;
 }
 
 
@@ -626,6 +631,54 @@ decoder_raw_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 			Assert(0);
 			break;
 	}
+
+	MemoryContextSwitchTo(old);
+	MemoryContextReset(data->context);
+}
+
+static void
+decoder_raw_message(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
+		XLogRecPtr lsn, bool transactional, const char *prefix, 
+    Size content_size, const char *content)
+{
+	DecoderRawData *data;
+  MemoryContext	old;
+	// char *content_str;
+
+	data = ctx->output_plugin_private;
+
+	/* Avoid leaking memory by using and resetting our own context */
+	old = MemoryContextSwitchTo(data->context);
+
+	OutputPluginPrepareWrite(ctx, true);
+	appendStringInfoString(ctx->out, "MESSAGE ");
+
+  if (transactional)
+    appendStringInfo(ctx->out, ",xid:%u", txn->xid);
+  else
+    appendStringInfoString(ctx->out, ",xid:null");
+
+  if (transactional)
+    appendStringInfo(ctx->out, ", timestamp:\"%s\"", timestamptz_to_str(txn->commit_time));
+  else
+    appendStringInfoString(ctx->out, ",timestamp:null");
+
+  char *lsn_str = DatumGetCString(DirectFunctionCall1(pg_lsn_out, UInt64GetDatum(lsn)));
+  appendStringInfo(ctx->out, ",lsn:\"%s\"", lsn_str);
+  pfree(lsn_str);
+
+	if (transactional)
+		appendStringInfoString(ctx->out, ",transactional:true");
+	else
+		appendStringInfoString(ctx->out, ",transactional:false");
+
+	appendStringInfoString(ctx->out, ",prefix:");
+	appendStringInfoString(ctx->out, prefix);
+
+	appendStringInfoString(ctx->out, ",content:");
+	appendStringInfoString(ctx->out, content);
+
+	OutputPluginWrite(ctx, true);
 
 	MemoryContextSwitchTo(old);
 	MemoryContextReset(data->context);
