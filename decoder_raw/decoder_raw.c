@@ -28,6 +28,7 @@
 #include "utils/relcache.h"
 #include "utils/syscache.h"
 #include "utils/typcache.h"
+#include "utils/json.h"
 
 
 PG_MODULE_MAGIC;
@@ -643,7 +644,7 @@ decoder_raw_message(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 {
 	DecoderRawData *data;
   MemoryContext	old;
-	// char *content_str;
+	char *content_str;
 
 	data = ctx->output_plugin_private;
 
@@ -654,29 +655,34 @@ decoder_raw_message(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 	appendStringInfoString(ctx->out, "MESSAGE ");
 
   if (transactional)
-    appendStringInfo(ctx->out, ",xid:%u", txn->xid);
+    appendStringInfo(ctx->out, "{\"xid\":%u", txn->xid);
   else
-    appendStringInfoString(ctx->out, ",xid:null");
+    appendStringInfoString(ctx->out, "{\"xid\":null");
 
   if (transactional)
-    appendStringInfo(ctx->out, ", timestamp:\"%s\"", timestamptz_to_str(txn->commit_time));
+    appendStringInfo(ctx->out, ",\"timestamp\":\"%s\"", timestamptz_to_str(txn->commit_time));
   else
-    appendStringInfoString(ctx->out, ",timestamp:null");
+    appendStringInfoString(ctx->out, ",\"timestamp\":null");
 
   char *lsn_str = DatumGetCString(DirectFunctionCall1(pg_lsn_out, UInt64GetDatum(lsn)));
-  appendStringInfo(ctx->out, ",lsn:\"%s\"", lsn_str);
+  appendStringInfo(ctx->out, ",\"lsn\":\"%s\"", lsn_str);
   pfree(lsn_str);
 
 	if (transactional)
-		appendStringInfoString(ctx->out, ",transactional:true");
+		appendStringInfoString(ctx->out, ",\"transactional\":true");
 	else
-		appendStringInfoString(ctx->out, ",transactional:false");
+		appendStringInfoString(ctx->out, ",\"transactional\":false");
 
-	appendStringInfoString(ctx->out, ",prefix:");
+	appendStringInfoString(ctx->out, ",\"prefix\":\"");
 	appendStringInfoString(ctx->out, prefix);
+	appendStringInfoString(ctx->out, "\"");
 
-	appendStringInfoString(ctx->out, ",content:");
-	appendStringInfoString(ctx->out, content);
+	appendStringInfoString(ctx->out, ",\"content\":");
+  content_str = (char *) palloc0((content_size + 1) * sizeof(char));
+	strncpy(content_str, content, content_size);
+	appendStringInfoString(ctx->out, content_str);
+  pfree(content_str);
+	appendStringInfoString(ctx->out, "}");
 
 	OutputPluginWrite(ctx, true);
 
